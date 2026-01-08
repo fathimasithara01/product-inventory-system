@@ -16,14 +16,12 @@ func NewStockHandler(ss service.StockService) *StockHandler {
 	return &StockHandler{stockService: ss}
 }
 
-// Stock request structure
 type stockRequest struct {
 	ProductID    string          `json:"product_id" binding:"required"`
 	SubVariantID string          `json:"sub_variant_id" binding:"required"`
 	Quantity     decimal.Decimal `json:"quantity" binding:"required"`
 }
 
-// POST /api/stock/in
 func (h *StockHandler) AddStock(c *gin.Context) {
 	var req stockRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -44,7 +42,6 @@ func (h *StockHandler) AddStock(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Stock added successfully"})
 }
 
-// POST /api/stock/out
 func (h *StockHandler) RemoveStock(c *gin.Context) {
 	var req stockRequest
 	if err := c.ShouldBindJSON(&req); err != nil {

@@ -6,8 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// GetPaginationParams extracts page and limit query parameters
-// Defaults: page=1, limit=10
 func GetPaginationParams(c *gin.Context) (page, limit int) {
 	page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
 	if err != nil || page < 1 {

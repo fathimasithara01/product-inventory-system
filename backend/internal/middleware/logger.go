@@ -7,7 +7,6 @@ import (
 	"go.uber.org/zap"
 )
 
-// LoggerMiddleware logs HTTP requests
 func LoggerMiddleware(logger *zap.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()

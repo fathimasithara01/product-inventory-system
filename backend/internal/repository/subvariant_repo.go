@@ -29,7 +29,6 @@ func (r *subVariantRepo) Create(ctx context.Context, tx *gorm.DB, subVariants []
 	return tx.WithContext(ctx).Create(&subVariants).Error
 }
 
-// Row-level lock for concurrency
 func (r *subVariantRepo) FindByIDForUpdate(ctx context.Context, tx *gorm.DB, id string) (*model.SubVariant, error) {
 	var sub model.SubVariant
 	if err := tx.WithContext(ctx).

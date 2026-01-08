@@ -20,13 +20,12 @@ func NewReportService(stockRepo repository.StockRepository) ReportService {
 	return &reportService{stockRepo: stockRepo}
 }
 
-// StockReport fetches all stock transactions between two dates
 func (s *reportService) StockReport(
 	ctx context.Context,
 	from, to time.Time,
 ) ([]model.StockTransaction, error) {
 	if from.IsZero() || to.IsZero() {
-		return nil, nil // Or return error if required
+		return nil, nil
 	}
 
 	return s.stockRepo.GetReport(ctx, from, to)

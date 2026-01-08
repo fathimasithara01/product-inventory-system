@@ -32,11 +32,15 @@ func (r *productRepo) List(ctx context.Context, offset, limit int) ([]model.Prod
 		total    int64
 	)
 
-	if err := r.db.WithContext(ctx).Model(&model.Product{}).Count(&total).Error; err != nil {
+	if err := r.db.WithContext(ctx).
+		Model(&model.Product{}).
+		Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
 	if err := r.db.WithContext(ctx).
+		Preload("Variants").
+		Preload("SubVariants").
 		Offset(offset).
 		Limit(limit).
 		Order("created_date DESC").

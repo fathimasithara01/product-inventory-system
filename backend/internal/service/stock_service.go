@@ -37,7 +37,6 @@ func NewStockService(
 	}
 }
 
-// STOCK IN
 func (s *stockService) AddStock(
 	ctx context.Context,
 	productID, subVariantID string,
@@ -50,7 +49,6 @@ func (s *stockService) AddStock(
 
 	return s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 
-		// Get sub-variant row for update (row-level lock)
 		sub, err := s.subRepo.FindByIDForUpdate(ctx, tx, subVariantID)
 		if err != nil {
 			return err
@@ -62,7 +60,6 @@ func (s *stockService) AddStock(
 			return err
 		}
 
-		// Record stock transaction
 		txn := &model.StockTransaction{
 			ID:              uuid.New(),
 			ProductID:       sub.ProductID,
@@ -74,12 +71,10 @@ func (s *stockService) AddStock(
 			return err
 		}
 
-		// Update total product stock
 		return s.productRepo.UpdateTotalStock(ctx, tx, productID)
 	})
 }
 
-// STOCK OUT
 func (s *stockService) RemoveStock(
 	ctx context.Context,
 	productID, subVariantID string,

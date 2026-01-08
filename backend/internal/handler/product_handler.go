@@ -25,12 +25,7 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 		return
 	}
 
-	if req.ProductName == "" || req.ProductCode == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "product name and code are required"})
-		return
-	}
-
-	productResp, err := h.productService.CreateProduct(
+	product, subVariants, err := h.productService.CreateProduct(
 		c.Request.Context(),
 		&req,
 	)
@@ -41,8 +36,8 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, gin.H{
 		"message":      "Product created successfully",
-		"product":      productResp,
-		"sub_variants": req.SubVariants,
+		"product":      product,
+		"sub_variants": subVariants,
 	})
 }
 

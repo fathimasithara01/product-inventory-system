@@ -13,7 +13,7 @@ import (
 )
 
 type ProductService interface {
-	CreateProduct(ctx context.Context, req *dto.CreateProductRequest) (*model.Product, error)
+	CreateProduct(ctx context.Context, req *dto.CreateProductRequest) (*model.Product, []model.SubVariant, error)
 	ListProducts(ctx context.Context, page, limit int) ([]model.Product, int64, error)
 }
 
@@ -38,10 +38,13 @@ func NewProductService(
 	}
 }
 
-func (s *productService) CreateProduct(ctx context.Context, req *dto.CreateProductRequest) (*model.Product, error) {
+func (s *productService) CreateProduct(
+	ctx context.Context,
+	req *dto.CreateProductRequest,
+) (*model.Product, []model.SubVariant, error) {
 
 	if req.ProductName == "" || req.ProductCode == "" {
-		return nil, errors.New("product name and code are required")
+		return nil, nil, errors.New("product name and code are required")
 	}
 
 	product := &model.Product{
@@ -53,14 +56,15 @@ func (s *productService) CreateProduct(ctx context.Context, req *dto.CreateProdu
 		HSNCode:      req.HSNCode,
 	}
 
+	var createdSubVariants []model.SubVariant
+
 	err := s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		// === 1. Create Product ===
+
 		product.ID = uuid.New()
 		if err := s.productRepo.Create(ctx, tx, product); err != nil {
 			return err
 		}
 
-		// === 2. Create Variants ===
 		variantUUIDs := make([]uuid.UUID, len(req.Variants))
 		for i, v := range req.Variants {
 			variant := model.Variant{
@@ -74,25 +78,27 @@ func (s *productService) CreateProduct(ctx context.Context, req *dto.CreateProdu
 			variantUUIDs[i] = variant.ID
 		}
 
-		// === 3. Create Options ===
 		optionUUIDs := make([]uuid.UUID, len(req.Options))
 		for i, o := range req.Options {
 			if o.VariantIndex >= len(variantUUIDs) {
-				return errors.New("invalid variant index for option")
+				return errors.New("invalid variant index")
 			}
+
 			option := model.VariantOption{
 				ID:        uuid.New(),
 				VariantID: variantUUIDs[o.VariantIndex],
 				Value:     o.Value,
 			}
+
 			if err := s.variantRepo.CreateOptions(ctx, tx, []model.VariantOption{option}); err != nil {
 				return err
 			}
+
 			optionUUIDs[i] = option.ID
 		}
 
-		// === 4. Create SubVariants ===
 		for _, sv := range req.SubVariants {
+
 			var optionIDs []string
 			for _, idx := range sv.OptionIndices {
 				if idx >= len(optionUUIDs) {
@@ -100,26 +106,30 @@ func (s *productService) CreateProduct(ctx context.Context, req *dto.CreateProdu
 				}
 				optionIDs = append(optionIDs, optionUUIDs[idx].String())
 			}
-			subVariant := model.SubVariant{
+
+			sub := model.SubVariant{
 				ID:        uuid.New(),
 				ProductID: product.ID,
 				OptionIDs: optionIDs,
 				SKU:       sv.SKU,
 				Stock:     decimal.RequireFromString(sv.Stock),
 			}
-			if err := s.subRepo.Create(ctx, tx, []model.SubVariant{subVariant}); err != nil {
-				return err
-			}
+
+			createdSubVariants = append(createdSubVariants, sub)
+		}
+
+		if err := s.subRepo.Create(ctx, tx, createdSubVariants); err != nil {
+			return err
 		}
 
 		return nil
 	})
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return product, nil
+	return product, createdSubVariants, nil
 }
 
 func (s *productService) ListProducts(ctx context.Context, page, limit int) ([]model.Product, int64, error) {

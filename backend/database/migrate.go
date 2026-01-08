@@ -7,7 +7,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// RunMigrations auto-creates tables if they don't exist
 func RunMigrations(db *gorm.DB) {
 	err := db.AutoMigrate(
 		&model.Product{},

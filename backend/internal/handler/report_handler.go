@@ -16,7 +16,6 @@ func NewReportHandler(rs service.ReportService) *ReportHandler {
 	return &ReportHandler{reportService: rs}
 }
 
-// GET /api/stock/report?from=2026-01-01&to=2026-01-08
 func (h *ReportHandler) StockReport(c *gin.Context) {
 	fromStr := c.Query("from")
 	toStr := c.Query("to")
