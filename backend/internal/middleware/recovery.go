@@ -1,20 +1,19 @@
 package middleware
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
-func Recovery() gin.HandlerFunc {
+func RecoveryMiddleware(logger *zap.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		defer func() {
 			if err := recover(); err != nil {
-				fmt.Println("Panic recovered:", err)
+				logger.Error("panic recovered", zap.Any("error", err))
 				c.JSON(http.StatusInternalServerError, gin.H{
-					"status":  "error",
-					"message": "internal server error",
+					"error": "internal server error",
 				})
 				c.Abort()
 			}

@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/fathimasithara01/product-inventory-system/internal/models"
+	"github.com/fathimasithara01/product-inventory-system/internal/model"
 	"github.com/fathimasithara01/product-inventory-system/internal/repository"
 	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
@@ -37,6 +37,7 @@ func NewStockService(
 	}
 }
 
+// STOCK IN
 func (s *stockService) AddStock(
 	ctx context.Context,
 	productID, subVariantID string,
@@ -49,36 +50,36 @@ func (s *stockService) AddStock(
 
 	return s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 
-		subVariant, err := s.subRepo.FindByIDForUpdate(ctx, tx, subVariantID)
+		// Get sub-variant row for update (row-level lock)
+		sub, err := s.subRepo.FindByIDForUpdate(ctx, tx, subVariantID)
 		if err != nil {
 			return err
 		}
 
-		if subVariant.ProductID.String() != productID {
-			return errors.New("sub-variant does not belong to product")
-		}
+		sub.Stock = sub.Stock.Add(qty)
 
-		subVariant.Stock = subVariant.Stock.Add(qty)
-		if err := s.subRepo.UpdateStock(ctx, tx, subVariant); err != nil {
+		if err := s.subRepo.UpdateStock(ctx, tx, sub); err != nil {
 			return err
 		}
 
-		txn := &models.StockTransaction{
+		// Record stock transaction
+		txn := &model.StockTransaction{
 			ID:              uuid.New(),
-			ProductID:       subVariant.ProductID,
-			SubVariantID:    subVariant.ID,
+			ProductID:       sub.ProductID,
+			SubVariantID:    sub.ID,
 			Quantity:        qty,
 			TransactionType: "IN",
 		}
-
 		if err := s.stockRepo.CreateTransaction(ctx, tx, txn); err != nil {
 			return err
 		}
 
+		// Update total product stock
 		return s.productRepo.UpdateTotalStock(ctx, tx, productID)
 	})
 }
 
+// STOCK OUT
 func (s *stockService) RemoveStock(
 	ctx context.Context,
 	productID, subVariantID string,
@@ -91,28 +92,25 @@ func (s *stockService) RemoveStock(
 
 	return s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 
-		subVariant, err := s.subRepo.FindByIDForUpdate(ctx, tx, subVariantID)
+		sub, err := s.subRepo.FindByIDForUpdate(ctx, tx, subVariantID)
 		if err != nil {
 			return err
 		}
 
-		if subVariant.ProductID.String() != productID {
-			return errors.New("sub-variant does not belong to product")
-		}
-
-		if subVariant.Stock.LessThan(qty) {
+		if sub.Stock.LessThan(qty) {
 			return errors.New("insufficient stock")
 		}
 
-		subVariant.Stock = subVariant.Stock.Sub(qty)
-		if err := s.subRepo.UpdateStock(ctx, tx, subVariant); err != nil {
+		sub.Stock = sub.Stock.Sub(qty)
+
+		if err := s.subRepo.UpdateStock(ctx, tx, sub); err != nil {
 			return err
 		}
 
-		txn := &models.StockTransaction{
+		txn := &model.StockTransaction{
 			ID:              uuid.New(),
-			ProductID:       subVariant.ProductID,
-			SubVariantID:    subVariant.ID,
+			ProductID:       sub.ProductID,
+			SubVariantID:    sub.ID,
 			Quantity:        qty.Neg(),
 			TransactionType: "OUT",
 		}

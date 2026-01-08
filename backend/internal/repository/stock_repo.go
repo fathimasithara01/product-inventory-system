@@ -4,42 +4,34 @@ import (
 	"context"
 	"time"
 
-	"github.com/fathimasithara01/product-inventory-system/internal/models"
+	"github.com/fathimasithara01/product-inventory-system/internal/model"
 	"gorm.io/gorm"
 )
 
 type StockRepository interface {
-	CreateTransaction(ctx context.Context, tx *gorm.DB, txn *models.StockTransaction) error
-	GetReport(ctx context.Context, from, to time.Time) ([]models.StockTransaction, error)
+	CreateTransaction(ctx context.Context, tx *gorm.DB, txn *model.StockTransaction) error
+	GetReport(ctx context.Context, from, to time.Time) ([]model.StockTransaction, error)
 }
 
-type stockRepository struct {
+type stockRepo struct {
 	db *gorm.DB
 }
 
 func NewStockRepository(db *gorm.DB) StockRepository {
-	return &stockRepository{db: db}
+	return &stockRepo{db: db}
 }
 
-func (r *stockRepository) CreateTransaction(
-	ctx context.Context,
-	tx *gorm.DB,
-	txn *models.StockTransaction,
-) error {
+func (r *stockRepo) CreateTransaction(ctx context.Context, tx *gorm.DB, txn *model.StockTransaction) error {
 	return tx.WithContext(ctx).Create(txn).Error
 }
 
-func (r *stockRepository) GetReport(
-	ctx context.Context,
-	from, to time.Time,
-) ([]models.StockTransaction, error) {
-
-	var txns []models.StockTransaction
-
-	err := r.db.WithContext(ctx).
+func (r *stockRepo) GetReport(ctx context.Context, from, to time.Time) ([]model.StockTransaction, error) {
+	var txns []model.StockTransaction
+	if err := r.db.WithContext(ctx).
 		Where("transaction_date BETWEEN ? AND ?", from, to).
 		Order("transaction_date DESC").
-		Find(&txns).Error
-
-	return txns, err
+		Find(&txns).Error; err != nil {
+		return nil, err
+	}
+	return txns, nil
 }

@@ -16,10 +16,15 @@ func NewReportHandler(rs service.ReportService) *ReportHandler {
 	return &ReportHandler{reportService: rs}
 }
 
-// GET /reports/stock?from=2025-01-01&to=2025-01-31
+// GET /api/stock/report?from=2026-01-01&to=2026-01-08
 func (h *ReportHandler) StockReport(c *gin.Context) {
 	fromStr := c.Query("from")
 	toStr := c.Query("to")
+
+	if fromStr == "" || toStr == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "from and to dates are required"})
+		return
+	}
 
 	from, err := time.Parse("2006-01-02", fromStr)
 	if err != nil {
@@ -33,17 +38,11 @@ func (h *ReportHandler) StockReport(c *gin.Context) {
 		return
 	}
 
-	data, err := h.reportService.StockReport(
-		c.Request.Context(),
-		from,
-		to,
-	)
+	data, err := h.reportService.StockReport(c.Request.Context(), from, to)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"data": data,
-	})
+	c.JSON(http.StatusOK, gin.H{"data": data})
 }

@@ -1,4 +1,4 @@
-package models
+package model
 
 import (
 	"time"
@@ -9,9 +9,9 @@ import (
 
 type StockTransaction struct {
 	ID              uuid.UUID       `gorm:"type:uuid;primaryKey"`
-	ProductID       uuid.UUID       `gorm:"type:uuid;not null;index"`
-	SubVariantID    uuid.UUID       `gorm:"type:uuid;not null;index"`
+	ProductID       uuid.UUID       `gorm:"type:uuid;index;not null"`
+	SubVariantID    uuid.UUID       `gorm:"type:uuid;index;not null"`
 	Quantity        decimal.Decimal `gorm:"type:numeric(20,8);not null"`
-	TransactionType string          `gorm:"not null"`
+	TransactionType string          `gorm:"type:varchar(20);not null"` // IN | OUT
 	TransactionDate time.Time       `gorm:"autoCreateTime"`
 }

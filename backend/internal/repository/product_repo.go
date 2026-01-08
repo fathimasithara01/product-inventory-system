@@ -3,63 +3,59 @@ package repository
 import (
 	"context"
 
-	"github.com/fathimasithara01/product-inventory-system/internal/models"
+	"github.com/fathimasithara01/product-inventory-system/internal/model"
 	"gorm.io/gorm"
 )
 
 type ProductRepository interface {
-	Create(ctx context.Context, tx *gorm.DB, product *models.Product) error
-	List(ctx context.Context, offset, limit int) ([]models.Product, int64, error)
-	FindByID(ctx context.Context, id string) (*models.Product, error)
+	Create(ctx context.Context, tx *gorm.DB, product *model.Product) error
+	List(ctx context.Context, offset, limit int) ([]model.Product, int64, error)
+	FindByID(ctx context.Context, id string) (*model.Product, error)
 	UpdateTotalStock(ctx context.Context, tx *gorm.DB, productID string) error
 }
 
-type productRepository struct {
+type productRepo struct {
 	db *gorm.DB
 }
 
 func NewProductRepository(db *gorm.DB) ProductRepository {
-	return &productRepository{db: db}
+	return &productRepo{db: db}
 }
 
-func (r *productRepository) Create(ctx context.Context, tx *gorm.DB, product *models.Product) error {
+func (r *productRepo) Create(ctx context.Context, tx *gorm.DB, product *model.Product) error {
 	return tx.WithContext(ctx).Create(product).Error
 }
 
-func (r *productRepository) List(ctx context.Context, offset, limit int) ([]models.Product, int64, error) {
+func (r *productRepo) List(ctx context.Context, offset, limit int) ([]model.Product, int64, error) {
 	var (
-		products []models.Product
+		products []model.Product
 		total    int64
 	)
 
-	err := r.db.WithContext(ctx).Model(&models.Product{}).Count(&total).Error
-	if err != nil {
+	if err := r.db.WithContext(ctx).Model(&model.Product{}).Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
-	err = r.db.WithContext(ctx).
+	if err := r.db.WithContext(ctx).
 		Offset(offset).
 		Limit(limit).
 		Order("created_date DESC").
-		Find(&products).Error
+		Find(&products).Error; err != nil {
+		return nil, 0, err
+	}
 
-	return products, total, err
+	return products, total, nil
 }
 
-func (r *productRepository) FindByID(ctx context.Context, id string) (*models.Product, error) {
-	var product models.Product
-	err := r.db.WithContext(ctx).First(&product, "id = ?", id).Error
-	if err != nil {
+func (r *productRepo) FindByID(ctx context.Context, id string) (*model.Product, error) {
+	var product model.Product
+	if err := r.db.WithContext(ctx).First(&product, "id = ?", id).Error; err != nil {
 		return nil, err
 	}
 	return &product, nil
 }
 
-func (r *productRepository) UpdateTotalStock(
-	ctx context.Context,
-	tx *gorm.DB,
-	productID string,
-) error {
+func (r *productRepo) UpdateTotalStock(ctx context.Context, tx *gorm.DB, productID string) error {
 	return tx.WithContext(ctx).Exec(`
 		UPDATE products
 		SET total_stock = (
@@ -67,6 +63,6 @@ func (r *productRepository) UpdateTotalStock(
 			FROM sub_variants
 			WHERE product_id = ?
 		)
-		WHERE id = ?
+		WHERE id = ?;
 	`, productID, productID).Error
 }

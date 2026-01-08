@@ -3,28 +3,28 @@ package repository
 import (
 	"context"
 
-	"github.com/fathimasithara01/product-inventory-system/internal/models"
+	"github.com/fathimasithara01/product-inventory-system/internal/model"
 	"gorm.io/gorm"
 )
 
 type VariantRepository interface {
-	Create(ctx context.Context, tx *gorm.DB, variant *models.Variant) error
-	CreateOptions(ctx context.Context, tx *gorm.DB, options []models.VariantOption) error
+	Create(ctx context.Context, tx *gorm.DB, variant *model.Variant) error
+	CreateOptions(ctx context.Context, tx *gorm.DB, options []model.VariantOption) error
 }
 
-type variantRepository struct {
+type variantRepo struct {
 	db *gorm.DB
 }
 
 func NewVariantRepository(db *gorm.DB) VariantRepository {
-	return &variantRepository{db: db}
+	return &variantRepo{db: db}
 }
 
-func (r *variantRepository) Create(ctx context.Context, tx *gorm.DB, variant *models.Variant) error {
+func (r *variantRepo) Create(ctx context.Context, tx *gorm.DB, variant *model.Variant) error {
 	return tx.WithContext(ctx).Create(variant).Error
 }
 
-func (r *variantRepository) CreateOptions(ctx context.Context, tx *gorm.DB, options []models.VariantOption) error {
+func (r *variantRepo) CreateOptions(ctx context.Context, tx *gorm.DB, options []model.VariantOption) error {
 	if len(options) == 0 {
 		return nil
 	}

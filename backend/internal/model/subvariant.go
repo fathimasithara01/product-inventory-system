@@ -1,4 +1,4 @@
-package models
+package model
 
 import (
 	"github.com/google/uuid"
@@ -8,9 +8,8 @@ import (
 
 type SubVariant struct {
 	ID        uuid.UUID       `gorm:"type:uuid;primaryKey"`
-	ProductID uuid.UUID       `gorm:"type:uuid;not null;index"`
-	OptionIDs pq.StringArray  `gorm:"type:text[]"`
-	SKU       string          `gorm:"unique;not null"`
+	ProductID uuid.UUID       `gorm:"type:uuid;index;not null"`
+	OptionIDs pq.StringArray  `gorm:"type:text[];not null"`
+	SKU       string          `gorm:"uniqueIndex;not null"`
 	Stock     decimal.Decimal `gorm:"type:numeric(20,8);default:0"`
 }
-
