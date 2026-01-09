@@ -1,15 +1,9 @@
-<header class="header">
-  <h1>Product Inventory System</h1>
-  <p>Go + Svelte Machine Test</p>
-</header>
+<!-- src/components/common/Header.svelte -->
+<script>
+  export let title = "Product Inventory";
+  export let className = ""; // allow extra Tailwind classes if needed
+</script>
 
-<style>
-  .header {
-    padding: 16px;
-    border-bottom: 1px solid #ddd;
-    margin-bottom: 20px;
-    text-align: center;
-  }
-  h1 { margin: 0; font-size: 22px; }
-  p { margin: 4px 0 0; color: #666; font-size: 14px; }
-</style>
+<header class={`bg-blue-600 text-white p-4 shadow-md ${className}`}>
+  <h1 class="text-xl font-bold">{title}</h1>
+</header>

@@ -1,42 +1,58 @@
+<!-- src/components/product/ProductList.svelte -->
 <script>
-  import { onMount } from "svelte";
-  import { getProducts } from "../api/api.js";
-  import Pagination from "./Pagination.svelte";
+  import { products, fetchProducts, totalProducts } from '../../store/productStore.js';
+  import Pagination from '../common/Pagination.svelte';
 
-  let products = [], loading = false, error = "";
-  let page = 1, limit = 10, total = 0;
+  let page = 1;
+  let limit = 5;
 
-  async function loadProducts() {
-    try {
-      loading = true; error = "";
-      const res = await getProducts(page, limit);
-      products = res.data;
-      total = res.total;
-    } catch(e) {
-      error = "Failed to load products";
-    } finally {
-      loading = false;
-    }
-  }
+  // Reactive statement: fetch products whenever page or limit changes
+  $: fetchProducts(page, limit);
 
-  onMount(loadProducts);
+  const handlePageChange = (p) => {
+    page = p;
+    fetchProducts(page, limit);
+  };
 </script>
 
-<h2>Product List</h2>
-{#if loading}<p>Loading...</p>
-{:else if error}<p class="error">{error}</p>
-{:else}
-  <table>
-    <thead><tr><th>Name</th><th>Code</th><th>HSN</th><th>Total Stock</th><th>Status</th></tr></thead>
-    <tbody>{#each products as p}
-      <tr>
-        <td>{p.product_name}</td>
-        <td>{p.product_code}</td>
-        <td>{p.hsn_code}</td>
-        <td>{p.total_stock}</td>
-        <td>{p.active ? "Active" : "Inactive"}</td>
-      </tr>
-    {/each}</tbody>
-  </table>
-  <Pagination {page} {limit} {total} on:change={(e)=>{ page=e.detail.page; loadProducts(); }} />
-{/if}
+<div class="p-4 border rounded shadow">
+  <h2 class="text-lg font-bold mb-2">Product List</h2>
+
+  {#if $products.length === 0}
+    <p>No products found.</p>
+  {:else}
+    <table class="border w-full">
+      <thead class="bg-gray-200">
+        <tr>
+          <th class="border p-1">Name</th>
+          <th class="border p-1">Code</th>
+          <th class="border p-1">Image</th>
+          <th class="border p-1">Variants</th>
+        </tr>
+      </thead>
+      <tbody>
+        {#each $products as product}
+          <tr>
+            <td class="border p-1">{product.product_name}</td>
+            <td class="border p-1">{product.product_code}</td>
+            <td class="border p-1">
+              <img src={product.product_image} alt={product.product_name} class="w-12 h-12 object-cover" />
+            </td>
+            <td class="border p-1">
+              {#each product.variants || [] as v}
+                <div>{v.name}: {v.options.join(', ')}</div>
+              {/each}
+            </td>
+          </tr>
+        {/each}
+      </tbody>
+    </table>
+
+    <!-- Pagination -->
+    <Pagination
+      currentPage={page}
+      totalPages={Math.ceil($totalProducts / limit)}
+      onPageChange={handlePageChange}
+    />
+  {/if}
+</div>
