@@ -25,7 +25,6 @@ export const fetchProducts = async (page = 1, limit = 10) => {
 
 // Transform Svelte product to backend DTO
 const transformProductForAPI = (product) => ({
-  product_id: product.product_id || 0,
   product_code: product.product_code,
   product_name: product.product_name,
   product_image: product.product_image || "",

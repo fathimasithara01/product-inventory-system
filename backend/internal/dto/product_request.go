@@ -16,11 +16,10 @@ type SubVariantRequest struct {
 }
 
 type CreateProductRequest struct {
-	ProductID    int64  `json:"product_id" binding:"required"`
 	ProductCode  string `json:"product_code" binding:"required"`
 	ProductName  string `json:"product_name" binding:"required"`
 	ProductImage string `json:"product_image"`
-	CreatedUser  string `json:"created_user"`
+	CreatedUser  string `json:"created_user" binding:"required"`
 	HSNCode      string `json:"hsn_code"`
 
 	Variants    []VariantRequest    `json:"variants"`

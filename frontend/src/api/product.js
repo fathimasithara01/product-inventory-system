@@ -1,4 +1,3 @@
-// src/api/product.js
 import { apiFetch } from '../utils/apiFetch.js';
 
 const BASE_URL = 'http://localhost:8080/api/products';

@@ -48,7 +48,6 @@ func (s *productService) CreateProduct(
 	}
 
 	product := &model.Product{
-		ProductID:    req.ProductID,
 		ProductCode:  req.ProductCode,
 		ProductName:  req.ProductName,
 		ProductImage: req.ProductImage,
