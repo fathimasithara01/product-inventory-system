@@ -91,7 +91,7 @@
     {#each product.sub_variants as sub, i}
       <SubVariantInput 
         subVariant={sub} 
-        variantOptions={product.variants.map(v => v.name)} 
+variantOptions={product.variants.map(v => v.options)}
         onUpdate={(s) => handleSubVariantUpdate(s, i)}
       />
     {/each}

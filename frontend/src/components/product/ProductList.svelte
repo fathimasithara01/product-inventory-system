@@ -39,10 +39,10 @@
               <img src={product.product_image} alt={product.product_name} class="w-12 h-12 object-cover" />
             </td>
             <td class="border p-1">
-              {#each product.variants || [] as v}
-                <div>{v.name}: {v.options.join(', ')}</div>
-              {/each}
-            </td>
+  {#each product.sub_variants || [] as sv}
+    <div>{sv.sku} ({sv.stock})</div>
+  {/each}
+</td>
           </tr>
         {/each}
       </tbody>
