@@ -1,8 +1,8 @@
 Product Inventory System – Backend
 
-A backend service built with Golang + Gin + GORM to manage products, variants, sub-variants, and stock transactions with full transactional safety.
+A backend service built with Golang and Gin + GORM to manage products, variants, sub-variants, and stock transactions with full transactional safety.
 
-🚀 Tech Stack
+Tech Stack
 
 Language: Go (Golang)
 
@@ -16,18 +16,16 @@ Decimal Handling: shopspring/decimal
 
 UUID: google/uuid
 
-📁 Project Structure
+Project Structure
 backend/
 ├── cmd/
 │   └── server/
 │       └── main.go
-│── config/
+├── config/
 │   └── config.go
-│
-│── database/
-│   └── migrate.go
+├── database/
+│   ├── migrate.go
 │   └── postgres.go
-│
 ├── internal/
 │   ├── handler/
 │   │   ├── product_handler.go
@@ -47,30 +45,28 @@ backend/
 │   │   ├── subvariant.go
 │   │   └── stock_transaction.go
 │   ├── dto/
-│   │    └── product_dto.go
+│   │   └── product_dto.go
 │   ├── middleware/
-│   │    ├── logger.go
-│   │    ├── recover.go
-│   ├── utils/
+│   │   ├── logger.go
+│   │   └── recover.go
+│   └── utils/
 │       ├── pagination.go
 │       ├── response.go
 │       └── validator.go
 ├── migrations/
-│   └── 00001_create_products.sql
-│   └── 00002_create_variants.sql
-│   └── 00003_create_variant_options.sql
-│   └── 00004_create_sub_variants.sql
+│   ├── 00001_create_products.sql
+│   ├── 00002_create_variants.sql
+│   ├── 00003_create_variant_options.sql
+│   ├── 00004_create_sub_variants.sql
 │   └── 00005_create_stock_transactions.sql
-│
-├──.env
-│
+├── .env
 ├── go.mod
 ├── go.sum
 └── README.md
 
-⚙️ Environment Variables
+Environment Variables
 
-Create a .env file or export variables:
+Create a .env file or export the following variables:
 
 DB_HOST=localhost
 DB_PORT=5432
@@ -78,22 +74,20 @@ DB_USER=postgres
 DB_PASSWORD=postgres
 DB_NAME=inventory_db
 
-▶️ Run the Server
+Running the Server
 go mod tidy
 go run cmd/server/main.go
 
 
-Server starts on:
+Server starts on: http://localhost:8080
 
-http://localhost:8080
+API Endpoints
+Product APIs
 
-📦 API Endpoints
-🔹 Product APIs
 Create Product
 POST /api/products
 
-
-Request JSON
+Request JSON:
 
 {
   "product_id": 1,
@@ -122,10 +116,12 @@ Request JSON
   ]
 }
 
+
 List Products
 GET /api/products?page=1&limit=10
 
-🔹 Stock APIs
+Stock APIs
+
 Stock IN
 POST /api/stock/in
 
@@ -134,6 +130,7 @@ POST /api/stock/in
   "sub_variant_id": "e0848ff9-7cc7-4174-8ba0-4e57835b0354",
   "quantity": "10"
 }
+
 
 Stock OUT
 POST /api/stock/out
@@ -144,31 +141,31 @@ POST /api/stock/out
   "quantity": "5"
 }
 
-🔹 Stock Report
-Get Stock Transactions
+
+Stock Report
 GET /api/stock/report?from=2026-01-01&to=2026-01-31
 
-🧠 Business Logic Highlights
+Business Logic Highlights
 
-✅ Atomic transactions using DB transactions
+Atomic transactions using DB transactions
 
-✅ Row-level locking (SELECT FOR UPDATE) for stock safety
+Row-level locking (SELECT FOR UPDATE) for stock safety
 
-✅ Accurate total stock auto-calculated from sub-variants
+Accurate total stock auto-calculated from sub-variants
 
-✅ Variant & SubVariant flexible modeling
+Flexible modeling for variants & sub-variants
 
-✅ Decimal-safe stock calculations
+Decimal-safe stock calculations
 
-🔐 Data Integrity Rules
+Data Integrity Rules
 
-Sub-variant stock can never go below zero
+Sub-variant stock cannot go below zero
 
 Stock updates are concurrent-safe
 
 Product total_stock always reflects sum of sub-variant stock
 
-📊 Database Tables (High Level)
+Database Tables
 
 products
 
@@ -180,7 +177,7 @@ sub_variants
 
 stock_transactions
 
-🧪 Testing with Postman
+Testing with Postman
 
 Recommended order:
 
@@ -194,10 +191,10 @@ Stock OUT
 
 Stock Report
 
-🧪 Postman Collection
-Import the collection from `postman/ProductInventorySystem.postman_collection.json` to test all APIs.
+Postman Collection:
+Import the collection from postman/ProductInventorySystem.postman_collection.json to test all APIs.
 
-📌 Future Enhancements
+Future Enhancements
 
 Pagination for stock report
 
@@ -209,7 +206,7 @@ Authentication (JWT)
 
 Soft delete support
 
-👩‍💻 Author
+Author
 
 Fathima Sithara
 Backend Developer (Golang | Distributed Systems)
