@@ -194,6 +194,9 @@ Stock OUT
 
 Stock Report
 
+🧪 Postman Collection
+Import the collection from `postman/ProductInventorySystem.postman_collection.json` to test all APIs.
+
 📌 Future Enhancements
 
 Pagination for stock report
